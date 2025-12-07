@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SpotAlert Admin – Users</title>
+
+<link rel="stylesheet" href="style.css" />
+<script defer src="admin_users.js"></script>
+
+<style>
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 10px;
+  border: 1px solid #e0e7f1;
+}
+th {
+  background: #eef5ff;
+}
+.action-btn {
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  border: none;
+}
+.suspend { background: #ff4444; color: white; }
+.upgrade { background: #007bff; color: white; }
+</style>
+</head>
+
+<body>
+
+<h1 style="text-align:center;margin-top:20px;">Admin – User Management</h1>
+
+<table id="usersTable">
+<tr>
+  <th>Name</th>
+  <th>Email</th>
+  <th>Plan</th>
+  <th>Cameras</th>
+  <th>Joined</th>
+  <th>Actions</th>
+</tr>
+</table>
+
+</body>
+</html>
