@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SpotAlert Admin Dashboard</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Poppins, Arial, sans-serif;
+        background: #f4f7fb;
+    }
+
+    .header {
+        background: #007bff;
+        color: white;
+        padding: 18px 25px;
+        font-size: 22px;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .header-nav a {
+        color: #e3f1ff;
+        margin-left: 14px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .header-nav a:hover {
+        text-decoration: underline;
+    }
+
+    .logout-btn {
+        background: white;
+        color: #007bff;
+        border: none;
+        padding: 8px 15px;
+        font-size: 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .container {
+        max-width: 1100px;
+        margin: 40px auto;
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+        margin-top: 0;
+        border-left: 5px solid #007bff;
+        padding-left: 10px;
+        color: #0a1733;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+        margin-bottom: 40px;
+    }
+
+    th, td {
+        border: 1px solid #dce3ee;
+        padding: 10px;
+        font-size: 14px;
+        text-align: left;
+    }
+
+    th {
+        background: #eef5ff;
+    }
+
+    .loading {
+        color: #007bff;
+        font-weight: 600;
+        padding: 10px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .badge-active {
+        background: #e6ffec;
+        color: #118c4f;
+    }
+    .badge-trial {
+        background: #fff8e6;
+        color: #c27b00;
+    }
+    .badge-suspended {
+        background: #ffe6e6;
+        color: #c22727;
+    }
+
+    .btn-sm {
+        padding: 6px 10px;
+        font-size: 12px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        margin-right: 6px;
+    }
+
+    .btn-suspend {
+        background: #ff9800;
+        color: white;
+    }
+    .btn-activate {
+        background: #27ae60;
+        color: white;
+    }
+    .btn-delete {
+        background: #e53935;
+        color: white;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="header-left">
+        <span>SpotAlert Admin Dashboard</span>
+        <div class="header-nav">
+            <a href="admin_dashboard.html">Dashboard</a>
+            <a href="admin_analytics.html">Analytics</a>
+        </div>
+    </div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<div class="container">
+
+    <h2>📌 Registered Users</h2>
+    <div id="usersLoading" class="loading">Loading users...</div>
+    <table id="usersTable">
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Plan</th>
+            <th>Status</th>
+            <th>Joined</th>
+            <th>Actions</th>
+        </tr>
+    </table>
+
+    <h2>🚨 Alerts Log</h2>
+    <div id="alertsLoading" class="loading">Loading alerts...</div>
+    <table id="alertsTable">
+        <tr>
+            <th>Email</th>
+            <th>Type</th>
+            <th>Channel</th>
+            <th>Cost</th>
+            <th>Time</th>
+        </tr>
+    </table>
+
+    <h2>💳 Subscription Plans</h2>
+    <div id="plansLoading" class="loading">Loading plans...</div>
+    <table id="plansTable">
+        <tr>
+            <th>Plan</th>
+            <th>Price</th>
+            <th>Cameras</th>
+            <th>Scan Limit</th>
+        </tr>
+    </table>
+
+</div>
+
+<script>
+    const API = "https://api.spotalert.live";
+
+    // ✅ Use admin token if available
+    const token = localStorage.getItem("admin_token") || localStorage.getItem("token");
+
+    if (!token) {
+        alert("Unauthorized. Please login as admin.");
+        window.location.href = "admin_login.html";
+    }
+
+    function authHeaders() {
+        return { "Authorization": "Bearer " + token, "Content-Type": "application/json" };
+    }
+
+    /** LOAD USERS **/
+    async function loadUsers() {
+        try {
+            const res = await fetch(`${API}/api/admin/users`, {
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (res.status === 401) return logout();
+
+            const users = await res.json();
+            const table = document.getElementById("usersTable");
+
+            const loadingEl = document.getElementById("usersLoading");
+            if (loadingEl) loadingEl.remove();
+
+            users.forEach(u => {
+                const row = table.insertRow();
+
+                const status = u.status || "active";
+                let badgeClass = "badge-active";
+                if (status === "trial") badgeClass = "badge-trial";
+                if (status === "suspended") badgeClass = "badge-suspended";
+
+                row.insertCell(0).innerText = u.name || "N/A";
+                row.insertCell(1).innerText = u.email;
+                row.insertCell(2).innerText = u.plan || "Free Trial";
+
+                const statusCell = row.insertCell(3);
+                statusCell.innerHTML = `<span class="badge ${badgeClass}">${status}</span>`;
+
+                row.insertCell(4).innerText = u.created_at
+                  ? new Date(u.created_at).toLocaleString()
+                  : "N/A";
+
+                const actionsCell = row.insertCell(5);
+                const id = u.id; // backend must return user.id
+
+                if (status === "suspended") {
+                    actionsCell.innerHTML = `
+                      <button class="btn-sm btn-activate" onclick="activateUser('${id}')">Activate</button>
+                      <button class="btn-sm btn-delete" onclick="deleteUser('${id}', '${u.email}')">Delete</button>
+                    `;
+                } else {
+                    actionsCell.innerHTML = `
+                      <button class="btn-sm btn-suspend" onclick="suspendUser('${id}', '${u.email}')">Suspend</button>
+                      <button class="btn-sm btn-delete" onclick="deleteUser('${id}', '${u.email}')">Delete</button>
+                    `;
+                }
+            });
+
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    /** LOAD ALERTS **/
+    async function loadAlerts() {
+        try {
+            const res = await fetch(`${API}/api/admin/alerts`, {
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (res.status === 401) return logout();
+
+            const alerts = await res.json();
+            const table = document.getElementById("alertsTable");
+
+            const loadingEl = document.getElementById("alertsLoading");
+            if (loadingEl) loadingEl.remove();
+
+            alerts.forEach(a => {
+                const row = table.insertRow();
+                row.insertCell(0).innerText = a.user_email;
+                row.insertCell(1).innerText = a.type;
+                row.insertCell(2).innerText = a.channel;
+                row.insertCell(3).innerText = a.cost != null ? "$" + a.cost : "-";
+                row.insertCell(4).innerText = a.timestamp
+                  ? new Date(a.timestamp).toLocaleString()
+                  : "N/A";
+            });
+
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    /** LOAD PLANS **/
+    async function loadPlans() {
+        try {
+            const res = await fetch(`${API}/api/admin/plans`, {
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (res.status === 401) return logout();
+
+            const plans = await res.json();
+            const table = document.getElementById("plansTable");
+
+            const loadingEl = document.getElementById("plansLoading");
+            if (loadingEl) loadingEl.remove();
+
+            plans.forEach(p => {
+                const row = table.insertRow();
+                row.insertCell(0).innerText = p.name;
+                row.insertCell(1).innerText = p.price != null ? "$" + p.price : "-";
+                row.insertCell(2).innerText = p.cameras ?? "-";
+                row.insertCell(3).innerText = p.scan_limit ?? "-";
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // 🔹 Suspend User
+    async function suspendUser(userId, email) {
+        if (!confirm(`Suspend this account?\n${email}`)) return;
+
+        try {
+            const res = await fetch(`${API}/api/admin/users/${userId}/suspend`, {
+                method: "POST",
+                headers: authHeaders(),
+                body: JSON.stringify({})
+            });
+
+            if (!res.ok) {
+                alert("Failed to suspend user.");
+                return;
+            }
+            alert("User suspended.");
+            location.reload();
+        } catch (err) {
+            alert("Server error.");
+        }
+    }
+
+    // 🔹 Activate User
+    async function activateUser(userId) {
+        try {
+            const res = await fetch(`${API}/api/admin/users/${userId}/activate`, {
+                method: "POST",
+                headers: authHeaders(),
+                body: JSON.stringify({})
+            });
+
+            if (!res.ok) {
+                alert("Failed to activate user.");
+                return;
+            }
+            alert("User activated.");
+            location.reload();
+        } catch (err) {
+            alert("Server error.");
+        }
+    }
+
+    // 🔹 Delete User
+    async function deleteUser(userId, email) {
+        if (!confirm(`PERMANENTLY delete this user and all data?\n${email}`)) return;
+
+        try {
+            const res = await fetch(`${API}/api/admin/users/${userId}`, {
+                method: "DELETE",
+                headers: authHeaders()
+            });
+
+            if (!res.ok) {
+                alert("Failed to delete user.");
+                return;
+            }
+            alert("User deleted.");
+            location.reload();
+        } catch (err) {
+            alert("Server error.");
+        }
+    }
+
+    // Logout
+    function logout() {
+        localStorage.removeItem("admin_token");
+        localStorage.removeItem("token");
+        window.location.href = "admin_login.html";
+    }
+
+    // Load everything
+    loadUsers();
+    loadAlerts();
+    loadPlans();
+</script>
+
+</body>
+</html>
