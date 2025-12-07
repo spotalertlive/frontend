@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotAlert Dashboard</title>
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="spotalert_logo.png" />
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="frosted-header">
+    <img src="spotalert_logo.png" class="logo" onclick="window.location.href='index.html'" style="cursor:pointer;" />
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="dashboard.html" style="color:#0073ff;font-weight:700;">Dashboard</a>
+      <a href="plans.html">Plans</a>
+      <a href="login.html" id="logoutBtn">Logout</a>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <div class="dashboard-container">
+    
+    <div id="currentPlan" class="plan-banner">Loading plan...</div>
+
+    <h2>Known Faces</h2>
+    <form id="faceUploadForm">
+      <input type="text" id="faceLabel" placeholder="Person Name" required />
+      <input type="file" id="faceImage" accept="image/*" required />
+      <button type="submit">Add Face</button>
+    </form>
+    <div id="faceList" class="face-list"></div>
+
+    <hr>
+
+    <h2>Test Detection</h2>
+    <form id="uploadForm">
+      <input type="file" id="cameraFile" accept="image/*" required />
+      <button type="submit">Upload</button>
+    </form>
+    <div id="result"></div>
+
+    <hr>
+
+    <h2>Alerts</h2>
+    <ul id="alertList"></ul>
+
+    <div id="usageContainer"></div>
+    <div id="replayContainer"></div>
+    <div id="emailsContainer"></div>
+
+    <button id="upgradeBtn" class="start-btn" style="margin-top:20px;">
+      Upgrade
+    </button>
+
+    <button id="logoutBtn2" class="start-btn" style="background:#ff5252;color:white;margin-top:10px;">
+      Logout
+    </button>
+
+  </div>
+
+  <div id="shira-assistant" class="shira-bubble">💬</div>
+
+  <script src="dashboard.js"></script>
+
+</body>
+</html>
