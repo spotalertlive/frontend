@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SpotAlert Admin Analytics</title>
+
+<!-- Chart.js (for graphs) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Poppins, Arial, sans-serif;
+    background: #f4f7fb;
+  }
+
+  .header {
+    background: #007bff;
+    color: white;
+    padding: 18px 25px;
+    font-size: 22px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .header-nav a {
+    color: #e3f1ff;
+    margin-left: 14px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .header-nav a:hover {
+    text-decoration: underline;
+  }
+
+  .logout-btn {
+    background: white;
+    color: #007bff;
+    border: none;
+    padding: 8px 15px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .page {
+    max-width: 1200px;
+    margin: 30px auto 60px;
+    padding: 0 15px 40px;
+  }
+
+  .section {
+    background: white;
+    border-radius: 12px;
+    padding: 22px 20px 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+
+  h2 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 20px;
+    border-left: 4px solid #007bff;
+    padding-left: 10px;
+    color: #0a1733;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+    margin-top: 10px;
+  }
+
+  .card {
+    background: #f9fbff;
+    border-radius: 10px;
+    padding: 14px 12px;
+    border: 1px solid #dde6f5;
+  }
+
+  .card-label {
+    font-size: 12px;
+    color: #5f718a;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .card-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0a1733;
+  }
+
+  .card-sub {
+    font-size: 12px;
+    color: #7a8798;
+    margin-top: 2px;
+  }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  .chart-box {
+    background: #f9fbff;
+    border-radius: 10px;
+    padding: 12px 10px 18px;
+    border: 1px solid #dde6f5;
+  }
+
+  .chart-box h3 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: #0a1733;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 13px;
+  }
+
+  th, td {
+    border: 1px solid #dce3ee;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background: #eef5ff;
+    font-size: 13px;
+  }
+
+  .loading {
+    color: #007bff;
+    font-weight: 600;
+    padding: 8px 0;
+  }
+
+  @media (max-width: 768px) {
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span>SpotAlert Admin Analytics</span>
+    <div class="header-nav">
+      <a href="admin_dashboard.html">Dashboard</a>
+      <a href="admin_analytics.html">Analytics</a>
+    </div>
+  </div>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<div class="page">
+
+  <!-- OVERVIEW CARDS -->
+  <div class="section">
+    <h2>📊 Overview</h2>
+    <div id="overviewLoading" class="loading">Loading analytics...</div>
+    <div class="cards" id="overviewCards" style="display:none;">
+      <div class="card">
+        <div class="card-label">Total Users</div>
+        <div class="card-value" id="statTotalUsers">-</div>
+        <div class="card-sub">All time</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Active Trials</div>
+        <div class="card-value" id="statTrials">-</div>
+        <div class="card-sub">Current free trial accounts</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Paid Users</div>
+        <div class="card-value" id="statPaid">-</div>
+        <div class="card-sub">Any paid plan</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Suspended Users</div>
+        <div class="card-value" id="statSuspended">-</div>
+        <div class="card-sub">Security or abuse</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Total Cameras</div>
+        <div class="card-value" id="statCameras">-</div>
+        <div class="card-sub">Across all accounts</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Alerts (24h)</div>
+        <div class="card-value" id="statAlerts24h">-</div>
+        <div class="card-sub">Last 24 hours</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Revenue This Month</div>
+        <div class="card-value" id="statRevenueMonth">-</div>
+        <div class="card-sub">Stripe subscriptions</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Alert Cost (Month)</div>
+        <div class="card-value" id="statCostMonth">-</div>
+        <div class="card-sub">Email / SMS / WhatsApp</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="section">
+    <h2>📈 Trends</h2>
+    <div class="charts-grid">
+      <div class="chart-box">
+        <h3>Signups (Last 30 Days)</h3>
+        <canvas id="chartSignups" height="180"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Alerts (Last 24 Hours)</h3>
+        <canvas id="chartAlerts" height="180"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Revenue (Last 12 Months)</h3>
+        <canvas id="chartRevenue" height="180"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- PER USER ALERT COSTS -->
+  <div class="section">
+    <h2>💰 Per-User Alert Cost</h2>
+    <div id="costLoading" class="loading">Loading cost breakdown...</div>
+    <table id="costTable">
+      <tr>
+        <th>Email</th>
+        <th>Total Alerts</th>
+        <th>Email Cost</th>
+        <th>SMS Cost</th>
+        <th>WhatsApp Cost</th>
+        <th>Total Cost</th>
+      </tr>
+    </table>
+  </div>
+
+  <!-- VISITOR ANALYTICS -->
+  <div class="section">
+    <h2>🌍 Visitor Analytics</h2>
+    <div id="visitorLoading" class="loading">Loading visitors...</div>
+    <table id="visitorTable">
+      <tr>
+        <th>Country / Region</th>
+        <th>Total Visits</th>
+        <th>Active Now</th>
+        <th>Top Device</th>
+        <th>Top Source</th>
+      </tr>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  const API = "https://api.spotalert.live";
+  const token = localStorage.getItem("admin_token") || localStorage.getItem("token");
+
+  if (!token) {
+    alert("Unauthorized. Please login as admin.");
+    window.location.href = "admin_login.html";
+  }
+
+  function authHeaders() {
+    return { "Authorization": "Bearer " + token };
+  }
+
+  function logout() {
+    localStorage.removeItem("admin_token");
+    localStorage.removeItem("token");
+    window.location.href = "admin_login.html";
+  }
+
+  // =========================
+  // LOAD OVERVIEW + CHART DATA
+  // =========================
+  async function loadAnalytics() {
+    try {
+      const res = await fetch(`${API}/api/admin/analytics`, {
+        headers: authHeaders()
+      });
+
+      if (res.status === 401) return logout();
+
+      const data = await res.json();
+      const stats = data.stats || {};
+
+      // Remove loading, show cards
+      const loadingEl = document.getElementById("overviewLoading");
+      if (loadingEl) loadingEl.remove();
+      document.getElementById("overviewCards").style.display = "grid";
+
+      // Fill stats (use fallback 0)
+      document.getElementById("statTotalUsers").innerText =
+        stats.total_users ?? "-";
+      document.getElementById("statTrials").innerText =
+        stats.active_trials ?? "-";
+      document.getElementById("statPaid").innerText =
+        stats.active_paid ?? "-";
+      document.getElementById("statSuspended").innerText =
+        stats.suspended_users ?? "-";
+      document.getElementById("statCameras").innerText =
+        stats.total_cameras ?? "-";
+      document.getElementById("statAlerts24h").innerText =
+        stats.alerts_24h ?? "-";
+      document.getElementById("statRevenueMonth").innerText =
+        stats.revenue_month != null ? "$" + stats.revenue_month.toFixed(2) : "-";
+      document.getElementById("statCostMonth").innerText =
+        stats.alert_cost_month != null ? "$" + stats.alert_cost_month.toFixed(2) : "-";
+
+      // ---- Charts ----
+      buildSignupsChart(data.signups_30d || []);
+      buildAlertsChart(data.alerts_24h || []);
+      buildRevenueChart(data.revenue_12m || []);
+
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function buildSignupsChart(rows) {
+    const ctx = document.getElementById("chartSignups");
+    if (!ctx || !rows.length) return;
+
+    const labels = rows.map(r => r.date);
+    const values = rows.map(r => r.count || 0);
+
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: "Signups",
+          data: values,
+          fill: false
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  }
+
+  function buildAlertsChart(rows) {
+    const ctx = document.getElementById("chartAlerts");
+    if (!ctx || !rows.length) return;
+
+    const labels = rows.map(r => r.hour);
+    const values = rows.map(r => r.count || 0);
+
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Alerts",
+          data: values
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  }
+
+  function buildRevenueChart(rows) {
+    const ctx = document.getElementById("chartRevenue");
+    if (!ctx || !rows.length) return;
+
+    const labels = rows.map(r => r.month);
+    const values = rows.map(r => r.amount || 0);
+
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: "Revenue",
+          data: values,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  }
+
+  // ==============================
+  // LOAD PER-USER ALERT COST TABLE
+  // ==============================
+  async function loadUsageCosts() {
+    try {
+      const res = await fetch(`${API}/api/admin/usage-costs`, {
+        headers: authHeaders()
+      });
+
+      if (res.status === 401) return logout();
+
+      const rows = await res.json();
+      const table = document.getElementById("costTable");
+      const loadingEl = document.getElementById("costLoading");
+      if (loadingEl) loadingEl.remove();
+
+      rows.forEach(r => {
+        const tr = table.insertRow();
+        tr.insertCell(0).innerText = r.email;
+        tr.insertCell(1).innerText = r.alerts ?? "-";
+        tr.insertCell(2).innerText = r.email_cost != null ? "$" + r.email_cost.toFixed(3) : "-";
+        tr.insertCell(3).innerText = r.sms_cost != null ? "$" + r.sms_cost.toFixed(3) : "-";
+        tr.insertCell(4).innerText = r.whatsapp_cost != null ? "$" + r.whatsapp_cost.toFixed(3) : "-";
+        tr.insertCell(5).innerText = r.total_cost != null ? "$" + r.total_cost.toFixed(3) : "-";
+      });
+
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // =======================
+  // LOAD VISITOR ANALYTICS
+  // =======================
+  async function loadVisitors() {
+    try {
+      const res = await fetch(`${API}/api/admin/visitors`, {
+        headers: authHeaders()
+      });
+
+      if (res.status === 401) return logout();
+
+      const rows = await res.json();
+      const table = document.getElementById("visitorTable");
+      const loadingEl = document.getElementById("visitorLoading");
+      if (loadingEl) loadingEl.remove();
+
+      rows.forEach(v => {
+        const tr = table.insertRow();
+        tr.insertCell(0).innerText = v.country || "Unknown";
+        tr.insertCell(1).innerText = v.visits ?? "-";
+        tr.insertCell(2).innerText = v.active_now ?? "-";
+        tr.insertCell(3).innerText = v.top_device || "-";
+        tr.insertCell(4).innerText = v.top_source || "-";
+      });
+
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // Run all
+  loadAnalytics();
+  loadUsageCosts();
+  loadVisitors();
+</script>
+
+</body>
+</html>
