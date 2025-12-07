@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Terms of Service | SpotAlert Inc.</title>
+
+<link rel="stylesheet" href="style.css" />
+<link rel="icon" type="image/png" href="spotalert_logo.png" />
+
+<style>
+body {
+  font-family: "Poppins", Arial, sans-serif;
+  background: #f9fbff;
+  margin: 0;
+  padding: 0;
+  color: #333;
+  line-height: 1.7;
+}
+
+.container {
+  max-width: 900px;
+  margin: 120px auto 50px;
+  background: #fff;
+  padding: 40px 35px;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+h1, h2 {
+  color: #0078ff;
+  margin-bottom: 12px;
+}
+
+ul li { margin-bottom: 8px; }
+
+/* Header */
+.frosted-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  z-index: 1000;
+}
+
+.frosted-header .logo {
+  height: 48px;
+  cursor: pointer;
+}
+
+.frosted-header nav a {
+  color: #0078ff;
+  margin: 0 12px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.frosted-header nav a:hover {
+  color: #005fcc;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 25px 0;
+  background: #f1f6ff;
+  font-size: 0.9rem;
+  color: #777;
+}
+
+footer a {
+  color: #0078ff;
+  text-decoration: none;
+  margin: 0 4px;
+}
+
+#shira-assistant {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  background: linear-gradient(145deg,#0078ff,#5da9ff);
+  color: white;
+  border-radius: 50%;
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,120,255,0.4);
+  transition: transform 0.2s ease;
+}
+
+#shira-assistant:hover {
+  transform: scale(1.1);
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="frosted-header">
+  <img src="spotalert_logo.png" class="logo" onclick="window.location.href='index.html'">
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="plans.html">Plans</a>
+    <a href="login.html">Login</a>
+  </nav>
+</header>
+
+<!-- MAIN TERMS CONTENT -->
+<div class="container">
+
+<h1>SpotAlert Terms of Service</h1>
+<p><strong>Last Updated:</strong> October 15, 2025</p>
+
+<p>Welcome to SpotAlert! 👋  
+These terms explain how you can use our products and services (“Services”).  
+By using SpotAlert, you agree to these terms.</p>
+
+<h2>1. Creating an Account</h2>
+<p>You must provide accurate information and keep your password secure.  
+You’re responsible for all activity under your account.</p>
+
+<h2>2. Using SpotAlert Responsibly</h2>
+<ul>
+<li>SpotAlert is for safety, not surveillance abuse.</li>
+<li>No using SpotAlert to stalk, harass, or violate privacy laws.</li>
+<li>Misuse may result in suspension or permanent account termination.</li>
+</ul>
+
+<h2>3. Plans, Payments, and Renewals</h2>
+<p>Paid plans renew automatically each billing cycle unless canceled beforehand.  
+Payments are processed securely through providers like Stripe.  
+Local taxes may apply.</p>
+
+<h2>4. Free Trials</h2>
+<p>Free trials help confirm your cameras and setup are compatible.  
+After upgrading to a paid plan, refunds are not guaranteed because performance can depend on individual hardware and network setups.</p>
+
+<p>By subscribing, you confirm the service meets your needs.</p>
+
+<h2>5. Alerts and Notifications</h2>
+<p>We do our best to send alerts fast, but we cannot control your internet provider, email provider, or device configuration.  
+Ensure your contact details are correct.</p>
+
+<h2>6. Ownership and Copyright</h2>
+<p>SpotAlert software, interface, branding, and AI systems belong to SpotAlert Inc.  
+Reverse engineering or reselling without permission is strictly prohibited.</p>
+
+<h2>7. Our Responsibility</h2>
+<p>SpotAlert is provided “as is.”  
+We aren’t liable for indirect or incidental damages.  
+Our total liability is limited to what you paid in the last 12 months.</p>
+
+<h2>8. Cancelling or Closing Your Account</h2>
+<p>You may cancel anytime through the dashboard.  
+We may suspend accounts that violate these terms.  
+Closed accounts may have their data deleted permanently.</p>
+
+<h2>9. Updates to These Terms</h2>
+<p>We may update these terms as laws or services evolve.  
+Continued use means acceptance of updates.</p>
+
+<h2>10. Need Help?</h2>
+<p>Email us at <strong>support@spotalert.live</strong> and we'll assist you as soon as possible.</p>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 SpotAlert Inc. All rights reserved.</p>
+  <div>
+    <a href="privacy.html">Privacy Policy</a> |
+    <a href="terms.html">Terms & Conditions</a> |
+    <a href="contact.html">Contact</a>
+  </div>
+</footer>
+
+<!-- SHIRA ASSISTANT -->
+<div id="shira-assistant" onclick="alert('👋 Hi! I’m Shira! How can I help you?')">💬</div>
+
+</body>
+</html>
