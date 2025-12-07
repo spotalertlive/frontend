@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plans & Pricing | SpotAlert Live</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="spotalert_logo.png" />
+
+  <style>
+    body {
+      font-family: "Poppins", Arial, sans-serif;
+      background: #f8fafc;
+      margin: 0;
+      color: #222;
+    }
+
+    header.frosted-header {
+      position: sticky;
+      top: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      z-index: 20;
+    }
+
+    header img.logo {
+      height: 48px;
+      cursor: pointer;
+    }
+
+    nav a {
+      margin: 0 12px;
+      text-decoration: none;
+      color: #0078ff;
+      font-weight: 500;
+    }
+
+    nav a:hover { color: #005fcc; }
+
+    .plans-hero {
+      text-align: center;
+      padding: 80px 20px 50px;
+      background: linear-gradient(180deg, #eaf3ff 0%, #ffffff 100%);
+    }
+
+    .plans-hero h1 {
+      font-size: 2.3rem;
+      color: #0078ff;
+      font-weight: 700;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+      gap: 25px;
+      padding: 40px 20px 80px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .plan-card {
+      background: white;
+      padding: 30px 25px;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,120,255,0.1);
+      text-align: center;
+      transition: 0.3s ease;
+    }
+
+    .plan-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 8px 25px rgba(0,120,255,0.2);
+    }
+
+    .plan-card h2 {
+      color: #0078ff;
+      margin-bottom: 8px;
+    }
+
+    .plan-card h3 {
+      font-size: 1.9rem;
+      margin: 5px 0 15px;
+    }
+
+    .plan-card ul {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+      margin-bottom: 25px;
+    }
+
+    .plan-card li {
+      padding: 6px 0;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .plan-card li::before {
+      content: "✔";
+      margin-right: 10px;
+      color: #0078ff;
+    }
+
+    .plan-btn {
+      background: #0078ff;
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .disabled-btn {
+      background: #b3b3b3;
+      cursor: not-allowed;
+    }
+
+    footer {
+      background: #f1f6fa;
+      padding: 25px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="frosted-header">
+  <img src="spotalert_logo.png" class="logo" onclick="window.location.href='index.html'">
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="plans.html">Plans</a>
+    <a href="login.html">Login</a>
+  </nav>
+</header>
+
+<section class="plans-hero">
+  <h1>Choose the Right Plan for You</h1>
+  <p>Start with a 14-day free trial. Upgrade anytime.</p>
+</section>
+
+<section class="pricing-grid">
+
+  <!-- FREE TRIAL -->
+  <div class="plan-card">
+    <h2>Free Trial</h2>
+    <h3>$0 / 14 Days</h3>
+    <ul>
+      <li>Up to 2 cameras</li>
+      <li>200 scans</li>
+      <li>Email alerts</li>
+      <li>No SMS/WhatsApp</li>
+    </ul>
+    <div class="plan-btn" onclick="selectPlan('Free Trial')">Start Free Trial</div>
+  </div>
+
+  <!-- STANDARD -->
+  <div class="plan-card">
+    <h2>Standard</h2>
+    <h3>$19.99 / month</h3>
+    <ul>
+      <li>Up to 4 cameras</li>
+      <li>3,000 scans/month</li>
+      <li>Email + App alerts</li>
+      <li>Basic analytics</li>
+    </ul>
+    <div class="plan-btn" onclick="selectPlan('Standard')">Choose Plan</div>
+  </div>
+
+  <!-- PREMIUM -->
+  <div class="plan-card">
+    <h2>Premium</h2>
+    <h3>$49.99 / month</h3>
+    <ul>
+      <li>Up to 10 cameras</li>
+      <li>10,000 scans/month</li>
+      <li>Zone + Time automation</li>
+      <li>Advanced AI tracking</li>
+    </ul>
+    <div class="plan-btn" onclick="selectPlan('Premium')">Choose Plan</div>
+  </div>
+
+  <!-- ELITE - COMING SOON -->
+  <div class="plan-card">
+    <h2>Elite</h2>
+    <h3>$149.99 / month</h3>
+    <ul>
+      <li>Unlimited cameras</li>
+      <li>30,000 scans/month</li>
+      <li>Email, App, SMS & WhatsApp alerts</li>
+      <li>4 alert recipients</li>
+      <li>1,000 SMS/WhatsApp credits</li>
+      <li>Priority AI support 24/7</li>
+      <li>Behavior tracking (Coming Soon)</li>
+      <li>Face Obscure Detection (Coming Soon)</li>
+      <li>Zone Restrictions (Coming Soon)</li>
+    </ul>
+    <div class="plan-btn disabled-btn">Coming Soon</div>
+  </div>
+
+</section>
+
+<footer>
+  <p>© 2025 SpotAlert Live. All rights reserved.</p>
+</footer>
+
+<script>
+  const API_BASE = "https://api.spotalert.live";
+
+  function selectPlan(planName) {
+    const user = localStorage.getItem("spotalert_user");
+    const token = localStorage.getItem("token");
+
+    if (!user || !token) {
+      window.location.href = "signup.html?plan=" + planName;
+      return;
+    }
+
+    fetch(`${API_BASE}/api/upgrade-plan`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ plan: planName })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert("Plan updated to " + planName);
+        window.location.href = "dashboard.html";
+      } else {
+        alert("Upgrade failed: " + data.error);
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
