@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpotAlert Live | 24/7 AI Surveillance</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="spotalert_logo.png">
+
+    <meta name="description" content="SpotAlert uses AI-powered facial recognition and motion detection to protect your home and business 24/7.">
+
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="frosted-header">
+        <img src="spotalert_logo.png" class="logo" onclick="window.location.href='index.html'">
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="#features">Features</a>
+            <a href="plans.html">Plans</a>
+            <a id="navAction" href="login.html">Login</a>
+        </nav>
+    </header>
+
+    <!-- HERO SECTION (TOP) -->
+    <section class="alert-hero">
+        <div class="alert-content">
+            <h1>Don’t Wait Until It Happens – <span>Stay Alert with SpotAlert</span></h1>
+            <p>SpotAlert uses advanced AI facial recognition and motion detection to identify unknown faces and send instant alerts before danger occurs.</p>
+            <a href="signup.html" class="start-btn">Start Free Trial</a>
+        </div>
+    </section>
+
+    <!-- CCTV SECTION -->
+    <section class="hero">
+        <img src="cctv_background.png" alt="CCTV Camera" class="hero-bg">
+        <div class="hero-overlay">
+            <h1 class="hero-title">24/7 AI Surveillance in Action</h1>
+            <p>SpotAlert keeps watch when you can’t — always learning, always alert.</p>
+            <a href="camera_connector.html" class="camera-assist-btn">Open Camera Assistant</a>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="features">
+        <h2>AI-Powered Security That Thinks Ahead</h2>
+        <div class="feature-list">
+            <div class="feature"><h3>Facial Recognition</h3><p>Detects and identifies faces instantly.</p></div>
+            <div class="feature"><h3>Live Tracking</h3><p>Follow movement in real-time.</p></div>
+            <div class="feature"><h3>Zone & Time Rules</h3><p>Restrict access by schedule.</p></div>
+            <div class="feature"><h3>Email & App Alerts</h3><p>Instant smart notifications.</p></div>
+            <div class="feature"><h3>AI Camera Assistant</h3><p>Upload a photo for setup help.</p></div>
+            <div class="feature"><h3>Cloud Dashboard</h3><p>Manage everything securely.</p></div>
+        </div>
+    </section>
+
+    <!-- NOTIFY -->
+    <section class="notify-section">
+        <div class="notify-content">
+            <h2>Be Notified Instantly When It Matters Most</h2>
+            <p>Start your free trial today and experience the power of AI security monitoring.</p>
+            <a href="signup.html" class="start-btn">Start Free Trial</a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>© 2025 SpotAlert Live. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="privacy.html">Privacy Policy</a> |
+            <a href="terms.html">Terms & Conditions</a> |
+            <a href="contact.html">Contact</a>
+        </div>
+    </footer>
+
+    <!-- SHIRA ASSISTANT -->
+    <div id="shira-assistant">💬</div>
+
+    <script>
+        // Change nav link when logged in
+        const token = localStorage.getItem("token");
+        const user = localStorage.getItem("spotalert_user");
+
+        if (token && user) {
+            document.getElementById("navAction").textContent = "Dashboard";
+            document.getElementById("navAction").href = "dashboard.html";
+        }
+
+        // Shira bubble action
+        document.getElementById("shira-assistant").onclick = function() {
+            alert("👋 Hi, I’m Shira! How can I assist you?");
+        };
+    </script>
+
+</body>
+</html>
