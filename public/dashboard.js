@@ -167,6 +167,32 @@ window.deleteKnownFace = async (id) => {
 // CAMERAS
 // ===========================================================
 async function loadCameras() {
+  const res = await fetch(
+    `${API}/camera/list?email=${user.email}`,
+    { headers: headers() }
+  );
+  const cams = await res.json();
+
+  const el = document.getElementById("cameraList");
+  el.innerHTML = cams.length
+    ? ""
+    : "<p class='muted'>No cameras registered.</p>";
+
+  cams.forEach(c => {
+    el.innerHTML += `
+      <div class="face-item">
+        <strong>${c.name}</strong><br>
+        IP: ${c.ip}<br>
+        Status: <b style="color:${c.status === 'online' ? 'green' : 'red'}">
+          ${c.status || 'offline'}
+        </b><br>
+        Last seen: ${c.last_seen
+          ? new Date(c.last_seen).toLocaleString()
+          : 'Never'}
+      </div>
+    `;
+  });
+} function loadCameras() {
   if (!cameraList) return;
   cameraList.innerHTML = "<li>Loading cameras...</li>";
 
