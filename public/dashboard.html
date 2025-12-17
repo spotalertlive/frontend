@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SpotAlert Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    .card { background:#fff; padding:20px; border-radius:12px; margin-bottom:22px; }
+    .face-item, .alert-item { border-left:4px solid #0073ff; padding:10px; margin-bottom:10px; }
+    .danger { background:#ff4d4d;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer; }
+    .muted { color:#777;font-size:14px; }
+
+    .plan-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .btn { padding:10px 14px; border:none; border-radius:8px; cursor:pointer; font-weight:600; }
+    .btn-primary { background:#0073ff; color:#fff; }
+    .btn-secondary { background:#eef5ff; color:#003b8f; }
+    .btn-disabled { background:#eee; color:#999; cursor:not-allowed; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; background:#eef5ff; color:#003b8f; font-weight:700; }
+  </style>
+</head>
+
+<body>
+
+<header class="frosted-header">
+  <img src="spotalert_logo.png" class="logo" onclick="location.href='index.html'">
+  <nav>
+    <a href="dashboard.html" style="font-weight:700;">Dashboard</a>
+    <a href="plans.html">Plans</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </nav>
+</header>
+
+<div class="dashboard-container">
+
+  <!-- PLAN BANNER -->
+  <div id="currentPlan" class="plan-banner">Loading plan...</div>
+
+  <!-- PLAN MANAGEMENT (NEW, INSIDE DASHBOARD) -->
+  <div class="card">
+    <h2>💳 Subscription</h2>
+    <div class="muted">
+      Current Plan: <span id="planPill" class="pill">Loading...</span>
+    </div>
+
+    <div class="plan-actions">
+      <button id="btnGoPlans" class="btn btn-secondary" onclick="goPlans()">Manage on Plans Page</button>
+      <button id="btnStandard" class="btn btn-primary" onclick="choosePlan('Standard')">Upgrade to Standard</button>
+      <button id="btnPremium" class="btn btn-primary" onclick="choosePlan('Premium')">Upgrade to Premium</button>
+      <button id="btnTrial" class="btn btn-secondary" onclick="choosePlan('Free Trial')">Downgrade to Free Trial</button>
+    </div>
+
+    <div id="planMsg" class="muted" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- CAMERAS -->
+  <div class="card">
+    <h2>📡 Cameras</h2>
+    <div id="cameraList" class="muted">Loading cameras...</div>
+  </div>
+
+  <!-- KNOWN FACES -->
+  <div class="card">
+    <h2>👤 Known Faces</h2>
+    <form id="faceForm">
+      <input id="firstName" placeholder="First name" required>
+      <input id="lastName" placeholder="Last name" required>
+      <input id="faceImages" type="file" accept="image/*" multiple required>
+      <button>Add Face</button>
+    </form>
+    <div id="faces"></div>
+  </div>
+
+  <!-- TEST DETECTION -->
+  <div class="card">
+    <h2>🧪 Test Detection</h2>
+    <input type="file" id="testImage" accept="image/*">
+    <button onclick="testDetect()">Upload</button>
+    <div id="testResult"></div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="card">
+    <h2>🚨 Alerts</h2>
+    <div id="alerts"></div>
+  </div>
+
+  <!-- USAGE / COST -->
+  <div class="card">
+    <h2>📊 Usage & Cost</h2>
+    <div id="usage"></div>
+  </div>
+
+</div>
+
+<script>
+const API = "https://api.spotalert.live";
+const token = localStorage.getItem("token");
+let user = {};
+try { user = JSON.parse(localStorage.getItem("spotalert_user") || "{}"); } catch {}
+
+if (!token || !user.email) location.href="login.html";
+
+document.getElementById("currentPlan").textContent = user.plan || "Free Trial";
+document.getElementById("planPill").textContent = user.plan || "Free Trial";
+
+const headers = () => ({ Authorization:"Bearer "+token });
+
+// ================= PLAN MANAGEMENT (NEW) =================
+const STRIPE_LINK_STANDARD = "https://buy.stripe.com/8x2eVd27naqS6vs0OLaVa02";
+const STRIPE_LINK_PREMIUM  = "https://buy.stripe.com/8x2eVd27naqS6vs0OLaVa02";
+
+const planRank = { "Free Trial":0, "Standard":1, "Premium":2, "Elite":3 };
+
+function refreshPlanUI(){
+  const plan = user.plan || "Free Trial";
+  document.getElementById("currentPlan").textContent = plan;
+  document.getElementById("planPill").textContent = plan;
+
+  // disable buttons based on current plan
+  const btnStandard = document.getElementById("btnStandard");
+  const btnPremium  = document.getElementById("btnPremium");
+  const btnTrial    = document.getElementById("btnTrial");
+  const msg         = document.getElementById("planMsg");
+
+  msg.textContent = "You can upgrade/downgrade anytime.";
+
+  // reset
+  [btnStandard, btnPremium, btnTrial].forEach(b=>{
+    b.disabled = false;
+    b.classList.remove("btn-disabled");
+  });
+
+  if (plan === "Standard") {
+    btnStandard.disabled = true; btnStandard.classList.add("btn-disabled");
+    btnStandard.textContent = "Current: Standard";
+    btnPremium.textContent = "Upgrade to Premium";
+    btnTrial.textContent = "Downgrade to Free Trial";
+  } else if (plan === "Premium") {
+    btnPremium.disabled = true; btnPremium.classList.add("btn-disabled");
+    btnPremium.textContent = "Current: Premium";
+    btnStandard.textContent = "Downgrade to Standard";
+    btnTrial.textContent = "Downgrade to Free Trial";
+  } else if (plan === "Free Trial") {
+    btnTrial.disabled = true; btnTrial.classList.add("btn-disabled");
+    btnTrial.textContent = "Current: Free Trial";
+    btnStandard.textContent = "Upgrade to Standard";
+    btnPremium.textContent = "Upgrade to Premium";
+  } else {
+    // fallback
+    btnStandard.textContent = "Standard";
+    btnPremium.textContent = "Premium";
+    btnTrial.textContent = "Free Trial";
+  }
+}
+
+function goPlans(){
+  window.location.href = "plans.html";
+}
+
+async function choosePlan(plan){
+  // Free Trial downgrade (instant local + optional backend confirm endpoint if you want later)
+  if (plan === "Free Trial") {
+    if (!confirm("Downgrade to Free Trial?")) return;
+    user.plan = "Free Trial";
+    localStorage.setItem("spotalert_user", JSON.stringify(user));
+    refreshPlanUI();
+    return;
+  }
+
+  // Standard / Premium -> Stripe
+  localStorage.setItem("pending_plan", JSON.stringify({ plan, email: user.email }));
+
+  if (plan === "Standard") window.location.href = STRIPE_LINK_STANDARD;
+  if (plan === "Premium")  window.location.href = STRIPE_LINK_PREMIUM;
+}
+
+// ================= CAMERAS =================
+async function loadCameras(){
+  const el = document.getElementById("cameraList");
+  try{
+    const r = await fetch(`${API}/api/camera/list?email=${user.email}`,{headers:headers()});
+    const cams = await r.json();
+    el.innerHTML = cams.length ? "" : "<p class='muted'>No cameras registered.</p>";
+
+    cams.forEach(c=>{
+      el.innerHTML += `
+        <div class="face-item">
+          <strong>${c.name}</strong><br>
+          IP: ${c.ip}<br>
+          Status: <b>${c.status || "offline"}</b><br>
+          Last seen: ${c.last_seen ? new Date(c.last_seen).toLocaleString() : "Never"}
+        </div>`;
+    });
+  }catch(e){
+    el.innerHTML = "<p class='muted'>Failed to load cameras.</p>";
+  }
+}
+
+// ================= KNOWN FACES =================
+async function loadFaces(){
+  const r = await fetch(`${API}/api/known-faces/list?email=${user.email}`,{headers:headers()});
+  const d = await r.json();
+  const el=document.getElementById("faces");
+  el.innerHTML = d.length? "" : "<p class='muted'>No known faces.</p>";
+  d.forEach(f=>{
+    el.innerHTML += `
+      <div class="face-item">
+        <strong>${f.first_name} ${f.last_name}</strong><br>
+        ${f.images} image(s)<br>
+        <button class="danger" onclick="delFace(${f.id})">Delete</button>
+      </div>`;
+  });
+}
+
+document.getElementById("faceForm").onsubmit = async e=>{
+  e.preventDefault();
+  const fd=new FormData();
+  fd.append("first_name",firstName.value);
+  fd.append("last_name",lastName.value);
+  fd.append("email",user.email);
+  [...faceImages.files].forEach(f=>fd.append("images",f));
+  await fetch(`${API}/api/known-faces/add`,{method:"POST",headers:headers(),body:fd});
+  e.target.reset(); loadFaces();
+};
+
+async function delFace(id){
+  if(!confirm("Delete face?"))return;
+  await fetch(`${API}/api/known-faces/${id}`,{method:"DELETE",headers:headers()});
+  loadFaces();
+}
+
+// ================= TEST DETECTION =================
+async function testDetect(){
+  const f=testImage.files[0];
+  if(!f)return;
+  const fd=new FormData();
+  fd.append("image",f);
+  fd.append("email",user.email);
+  const r=await fetch(`${API}/api/trigger-alert`,{method:"POST",body:fd});
+  const d=await r.json();
+  testResult.textContent = d.faces?.length ? "Known face detected" : "Unknown person detected";
+  loadAlerts(); loadUsage();
+}
+
+// ================= ALERTS =================
+async function loadAlerts(){
+  const r=await fetch(`${API}/api/alerts/list?type=all`,{headers:headers()});
+  const d=await r.json();
+  const el=document.getElementById("alerts");
+  el.innerHTML=d.length? "" : "<p class='muted'>No alerts.</p>";
+  d.slice(0,10).forEach(a=>{
+    el.innerHTML+=`
+      <div class="alert-item">
+        ${a.type.toUpperCase()} – ${new Date(a.timestamp).toLocaleString()}<br>
+        Cost: $${a.cost}
+      </div>`;
+  });
+}
+
+// ================= USAGE =================
+async function loadUsage(){
+  const r=await fetch(`${API}/api/usage-summary?email=${user.email}`,{headers:headers()});
+  const u=await r.json();
+  usage.innerHTML = `
+    Month: ${u.month}<br>
+    Total Cost: <strong>$${u.total_cost_usd}</strong>
+  `;
+}
+
+// ================= LOGOUT =================
+function logout(){ localStorage.clear(); location.href="login.html"; }
+
+// INIT
+refreshPlanUI();
+loadCameras();
+loadFaces();
+loadAlerts();
+loadUsage();
+</script>
+
+</body>
+</html>
