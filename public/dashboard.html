@@ -1,4 +1,25 @@
-<!DOCTYPE html>
+// ================= PLAN RETURN SYNC =================
+(function syncPendingPlan(){
+  try {
+    const pending = JSON.parse(localStorage.getItem("pending_plan") || "{}");
+    const user = JSON.parse(localStorage.getItem("spotalert_user") || "{}");
+
+    if (
+      pending.plan &&
+      pending.email &&
+      user.email &&
+      pending.email === user.email &&
+      pending.plan !== user.plan
+    ) {
+      user.plan = pending.plan;
+      localStorage.setItem("spotalert_user", JSON.stringify(user));
+      localStorage.removeItem("pending_plan");
+      console.log("✅ Plan synced:", pending.plan);
+    }
+  } catch (e) {
+    console.warn("Plan sync skipped");
+  }
+})();<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
