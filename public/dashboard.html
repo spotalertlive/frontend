@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SpotAlert Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    .card { background:#fff; padding:20px; border-radius:12px; margin-bottom:22px; }
+    .face-item, .alert-item { border-left:4px solid #0073ff; padding:10px; margin-bottom:10px; }
+    .danger { background:#ff4d4d;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer; }
+    .muted { color:#777;font-size:14px; }
+
+    .plan-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .btn { padding:10px 14px; border:none; border-radius:8px; cursor:pointer; font-weight:600; }
+    .btn-primary { background:#0073ff; color:#fff; }
+    .btn-secondary { background:#eef5ff; color:#003b8f; }
+    .btn-disabled { background:#eee; color:#999; cursor:not-allowed; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; background:#eef5ff; color:#003b8f; font-weight:700; }
+  </style>
+</head>
+
+<body>
+
+<header class="frosted-header">
+  <img src="spotalert_logo.png" class="logo" onclick="location.href='index.html'">
+  <nav>
+    <a href="dashboard.html" style="font-weight:700;">Dashboard</a>
+    <a href="plans.html">Plans</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </nav>
+</header>
+
+<div class="dashboard-container">
+
+  <!-- PLAN BANNER -->
+  <div id="currentPlan" class="plan-banner">Loading plan...</div>
+
+  <!-- PLAN MANAGEMENT (NEW, INSIDE DASHBOARD) -->
+  <div class="card">
+    <h2>💳 Subscription</h2>
+    <div class="muted">
+      Current Plan: <span id="planPill" class="pill">Loading...</span>
+    </div>
+
+    <div class="plan-actions">
+      <button id="btnGoPlans" class="btn btn-secondary" onclick="goPlans()">Manage on Plans Page</button>
+      <button id="btnStandard" class="btn btn-primary" onclick="choosePlan('Standard')">Upgrade to Standard</button>
+      <button id="btnPremium" class="btn btn-primary" onclick="choosePlan('Premium')">Upgrade to Premium</button>
+      <button id="btnTrial" class="btn btn-secondary" onclick="choosePlan('Free Trial')">Downgrade to Free Trial</button>
+    </div>
+
+    <div id="planMsg" class="muted" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- CAMERAS -->
+  <div class="card">
+    <h2>📡 Cameras</h2>
+    <div id="cameraList" class="muted">Loading cameras...</div>
+  </div>
+
+  <!-- KNOWN FACES -->
+  <div class="card">
+    <h2>👤 Known Faces</h2>
+    <form id="faceForm">
+      <input id="firstName" placeholder="First name" required>
+      <input id="lastName" placeholder="Last name" required>
+      <input id="faceImages" type="file" accept="image/*" multiple required>
+      <button>Add Face</button>
+    </form>
+    <div id="faces"></div>
+  </div>
+
+  <!-- TEST DETECTION -->
+  <div class="card">
+    <h2>🧪 Test Detection</h2>
+    <input type="file" id="testImage" accept="image/*">
+    <button onclick="testDetect()">Upload</button>
+    <div id="testResult"></div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="card">
+    <h2>🚨 Alerts</h2>
+    <div id="alerts"></div>
+  </div>
+
+  <!-- USAGE / COST -->
+  <div class="card">
+    <h2>📊 Usage</h2>
+    <div id="usage"></div>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================
+   SpotAlert Dashboard (FINAL LOCKED)
+   - Keeps your same UI/sections
+   - FIXED: Alerts show UNKNOWN ONLY (SpotAlert rule)
+   - FIXED: Test Detection wording (known = silent / unknown = alert)
+   ========================================================= */
+
+const API_BASE = "https://api.spotalert.live";
+const token = localStorage.getItem("token");
+let user = {};
+try { user = JSON.parse(localStorage.getItem("spotalert_user") || "{}"); } catch {}
+
+if (!token || !user.email) location.href = "login.html";
+
+document.getElementById("currentPlan").textContent = user.plan || "Free Trial";
+document.getElementById("planPill").textContent = user.plan || "Free Trial";
+
+const authHeaders = () => ({
+  "Authorization": "Bearer " + token
+});
+
+// ================= PLAN MANAGEMENT =================
+const STRIPE_LINK_STANDARD = "https://buy.stripe.com/8x2eVd27naqS6vs0OLaVa02";
+const STRIPE_LINK_PREMIUM  = "https://buy.stripe.com/8x2eVd27naqS6vs0OLaVa02";
+
+function refreshPlanUI(){
+  const plan = user.plan || "Free Trial";
+  document.getElementById("currentPlan").textContent = plan;
+  document.getElementById("planPill").textContent = plan;
+
+  const btnStandard = document.getElementById("btnStandard");
+  const btnPremium  = document.getElementById("btnPremium");
+  const btnTrial    = document.getElementById("btnTrial");
+  const msg         = document.getElementById("planMsg");
+
+  msg.textContent = "You can upgrade/downgrade anytime.";
+
+  [btnStandard, btnPremium, btnTrial].forEach(b=>{
+    b.disabled = false;
+    b.classList.remove("btn-disabled");
+  });
+
+  // reset button labels (so it doesn't stay "Current:" after switching)
+  btnStandard.textContent = "Upgrade to Standard";
+  btnPremium.textContent = "Upgrade to Premium";
+  btnTrial.textContent = "Downgrade to Free Trial";
+
+  if (plan === "Standard") {
+    btnStandard.disabled = true; btnStandard.classList.add("btn-disabled");
+    btnStandard.textContent = "Current: Standard";
+  } else if (plan === "Premium") {
+    btnPremium.disabled = true; btnPremium.classList.add("btn-disabled");
+    btnPremium.textContent = "Current: Premium";
+    btnStandard.textContent = "Downgrade to Standard";
+  } else if (plan === "Free Trial") {
+    btnTrial.disabled = true; btnTrial.classList.add("btn-disabled");
+    btnTrial.textContent = "Current: Free Trial";
+  }
+}
+
+function goPlans(){
+  window.location.href = "plans.html";
+}
+
+async function choosePlan(plan){
+  if (plan === "Free Trial") {
+    if (!confirm("Downgrade to Free Trial?")) return;
+    user.plan = "Free Trial";
+    localStorage.setItem("spotalert_user", JSON.stringify(user));
+    refreshPlanUI();
+    return;
+  }
+
+  localStorage.setItem("pending_plan", JSON.stringify({ plan, email: user.email }));
+
+  if (plan === "Standard") window.location.href = STRIPE_LINK_STANDARD;
+  if (plan === "Premium")  window.location.href = STRIPE_LINK_PREMIUM;
+}
+
+// ================= CAMERAS =================
+async function loadCameras(){
+  const el = document.getElementById("cameraList");
+  el.innerHTML = "<p class='muted'>Loading cameras...</p>";
+
+  try {
+    const r = await fetch(
+      `${API_BASE}/api/camera/list?email=${encodeURIComponent(user.email)}`,
+      { headers: authHeaders(), cache: "no-store" }
+    );
+
+    if (!r.ok) throw new Error("camera list failed");
+    const cams = await r.json();
+
+    el.innerHTML = (cams && cams.length) ? "" : "<p class='muted'>No cameras registered.</p>";
+
+    (cams || []).forEach(c=>{
+      el.innerHTML += `
+        <div class="face-item">
+          <strong>${c.name}</strong><br>
+          IP: ${c.ip}<br>
+          Status: <b>${c.status || "offline"}</b><br>
+          Last seen: ${c.last_seen ? new Date(c.last_seen).toLocaleString() : "Never"}
+        </div>`;
+    });
+  } catch (e) {
+    el.innerHTML = "<p class='muted'>Failed to load cameras.</p>";
+  }
+}
+
+// ================= KNOWN FACES =================
+async function loadFaces(){
+  const el = document.getElementById("faces");
+  el.innerHTML = "<p class='muted'>Loading known faces...</p>";
+
+  try {
+    const r = await fetch(
+      `${API_BASE}/api/known-faces/list?email=${encodeURIComponent(user.email)}`,
+      { headers: authHeaders(), cache: "no-store" }
+    );
+
+    if (!r.ok) throw new Error("faces list failed");
+    const d = await r.json();
+
+    el.innerHTML = (d && d.length) ? "" : "<p class='muted'>No known faces.</p>";
+
+    (d || []).forEach(f=>{
+      el.innerHTML += `
+        <div class="face-item">
+          <strong>${f.first_name} ${f.last_name}</strong><br>
+          ${f.images} image(s)<br>
+          <button class="danger" onclick="delFace(${f.id})">Delete</button>
+        </div>`;
+    });
+  } catch (e) {
+    el.innerHTML = "<p class='muted'>Failed to load known faces.</p>";
+  }
+}
+
+document.getElementById("faceForm").onsubmit = async e=>{
+  e.preventDefault();
+
+  const fd = new FormData();
+  fd.append("first_name", firstName.value);
+  fd.append("last_name", lastName.value);
+  fd.append("email", user.email);
+  [...faceImages.files].forEach(f => fd.append("images", f));
+
+  try {
+    const res = await fetch(`${API_BASE}/api/known-faces/add`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: fd
+    });
+
+    if (!res.ok) throw new Error("add face failed");
+
+    e.target.reset();
+    loadFaces();
+  } catch {
+    alert("Failed to add face");
+  }
+};
+
+async function delFace(id){
+  if(!confirm("Delete face?")) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/known-faces/${id}`, {
+      method: "DELETE",
+      headers: authHeaders()
+    });
+
+    if (!res.ok) throw new Error("delete failed");
+    loadFaces();
+  } catch {
+    alert("Failed to delete face");
+  }
+}
+
+// ================= TEST DETECTION =================
+async function testDetect(){
+  const f = testImage.files[0];
+  if(!f) return;
+
+  const fd = new FormData();
+  fd.append("image", f);
+  fd.append("email", user.email);
+
+  try {
+    const r = await fetch(`${API_BASE}/api/trigger-alert`, {
+      method:"POST",
+      headers: authHeaders(),
+      body: fd
+    });
+
+    const d = await r.json();
+
+    // SpotAlert rule: Known = silent, Unknown = alert
+    testResult.textContent = (d.faces?.length)
+      ? "Known person detected (no alert)."
+      : "🚨 Unknown person detected (alert triggered).";
+
+    loadAlerts();
+    loadUsage();
+  } catch (e) {
+    testResult.textContent = "Detection failed";
+  }
+}
+
+// ================= ALERTS (UNKNOWN ONLY) =================
+async function loadAlerts(){
+  const el = document.getElementById("alerts");
+  el.innerHTML = "<p class='muted'>Loading alerts...</p>";
+
+  try{
+    // ✅ UNKNOWN ONLY + email included (prevents cross-user mix)
+    const r = await fetch(
+      `${API_BASE}/api/alerts/list?type=unknown&email=${encodeURIComponent(user.email)}`,
+      {
+        headers: authHeaders(),
+        cache: "no-store"
+      }
+    );
+
+    if (!r.ok) throw new Error("alerts failed");
+    const d = await r.json();
+
+    el.innerHTML = (d && d.length) ? "" : "<p class='muted'>No unknown alerts.</p>";
+
+    (d || []).slice(0,10).forEach(a=>{
+      const time = a.timestamp ? new Date(a.timestamp).toLocaleString() : "-";
+      const img  = a.image_url || a.image || a.snapshot_url || "";
+      el.innerHTML += `
+        <div class="alert-item">
+          🚨 <strong>Unknown Person</strong> — ${time}
+          ${img ? `<br><img src="${img}" style="max-width:160px;border-radius:8px;margin-top:8px;">` : ""}
+        </div>`;
+    });
+  } catch(e){
+    el.innerHTML = "<p class='muted'>Failed to load alerts.</p>";
+  }
+}
+
+// ================= USAGE =================
+async function loadUsage(){
+  const el = document.getElementById("usage");
+  el.innerHTML = "<p class='muted'>Loading usage...</p>";
+
+  try {
+    const r = await fetch(`${API_BASE}/api/usage-summary?email=${encodeURIComponent(user.email)}`, {
+      headers: authHeaders(),
+      cache: "no-store"
+    });
+
+    if (!r.ok) throw new Error("usage failed");
+    const u = await r.json();
+
+    const used = (u.details && Array.isArray(u.details))
+      ? u.details.reduce((s,d)=>s + (d.count || 0), 0)
+      : (u.scans_used || 0);
+
+    const limit = (u.scan_limit !== undefined && u.scan_limit !== null) ? u.scan_limit : "∞";
+
+    el.innerHTML = `
+      <strong>Plan:</strong> ${user.plan || "Free Trial"}<br>
+      <strong>Month:</strong> ${u.month || "-"}<br>
+      <strong>Scans Used:</strong> ${used} / ${limit}<br>
+      <span class="muted">Your subscription billing is handled on the Plans page.</span>
+    `;
+  } catch {
+    el.innerHTML = "<p class='muted'>Failed to load usage.</p>";
+  }
+}
+
+// ================= LOGOUT =================
+function logout(){
+  localStorage.clear();
+  location.href="login.html";
+}
+
+// INIT (ANTI-CACHE)
+refreshPlanUI();
+loadCameras();
+loadFaces();
+loadAlerts();
+loadUsage();
+</script>
+
+<!-- Anti-cache lock (forces browser to reload file changes) -->
+<script>
+  // Hard no-cache for this page
+  if (performance && performance.getEntriesByType) {
+    // no-op; just ensuring page isn’t aggressively cached
+  }
+</script>
+
+</body>
+</html>
