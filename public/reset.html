@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reset Password | SpotAlert</title>
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="spotalert_logo.png" />
+
+  <!-- Anti-cache -->
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <style>
+    body {
+      margin: 0;
+      background: #f4f7fb;
+      font-family: "Poppins", Arial, sans-serif;
+      color: #1c1c1c;
+    }
+
+    /* ================= SAFE OFFSET FOR HEADER ================= */
+    .page-wrapper {
+      min-height: 100vh;
+      padding-top: 110px; /* 🔑 prevents header overlap */
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    /* ================= RESET CARD ================= */
+    .reset-card {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      padding: 32px 28px;
+      border-radius: 16px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.10);
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reset-card h2 {
+      margin-top: 0;
+      font-size: 22px;
+      color: #002d66;
+    }
+
+    .reset-card p {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.5;
+      margin-bottom: 22px;
+    }
+
+    /* ================= FORM ================= */
+    .reset-card input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #cfd8e6;
+      font-size: 15px;
+      margin-bottom: 16px;
+      outline: none;
+    }
+
+    .reset-card input:focus {
+      border-color: #0073ff;
+      box-shadow: 0 0 0 3px rgba(0,115,255,0.15);
+    }
+
+    .reset-card button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0073ff, #00a2ff);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+    }
+
+    .reset-card button:hover {
+      background: #005fd4;
+    }
+
+    /* ================= MESSAGE ================= */
+    #resetMessage {
+      margin-top: 16px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* ================= FOOT LINK ================= */
+    .back-link {
+      margin-top: 22px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .back-link a {
+      color: #0073ff;
+      font-weight: 600;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="frosted-header">
+  <img src="spotalert_logo.png" class="logo" onclick="location.href='index.html'">
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="plans.html">Plans</a>
+    <a href="login.html">Login</a>
+  </nav>
+</header>
+
+<!-- ================= CONTENT ================= -->
+<div class="page-wrapper">
+  <div class="reset-card">
+
+    <h2>Reset your password</h2>
+    <p>
+      Enter the email address associated with your SpotAlert account.
+      We’ll send you a secure password reset link.
+    </p>
+
+    <form id="resetForm">
+      <input
+        type="email"
+        id="resetEmail"
+        placeholder="Enter your email address"
+        required
+      />
+
+      <button type="submit">Send reset link</button>
+    </form>
+
+    <div id="resetMessage"></div>
+
+    <div class="back-link">
+      Back to <a href="login.html">Login</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= SCRIPT ================= -->
+<script src="reset.js"></script>
+
+</body>
+</html>
