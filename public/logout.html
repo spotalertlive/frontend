@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Logging Out – SpotAlert</title>
+
+  <!-- 🔒 Anti-cache (security) -->
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", Arial, sans-serif;
+      background: linear-gradient(135deg, #0078ff, #00aaff);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .logo {
+      width: 180px;
+      height: 65px;
+      margin-bottom: 35px;
+      background-image: url("spotalert_logo.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      animation: fadeIn 1s ease;
+    }
+
+    .spinner {
+      border: 6px solid rgba(255,255,255,0.25);
+      border-top: 6px solid #fff;
+      border-radius: 50%;
+      width: 65px;
+      height: 65px;
+      animation: spin 0.9s linear infinite;
+      margin-bottom: 30px;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 1.7rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      animation: fadeIn 1.4s ease;
+    }
+
+    p {
+      font-size: 1rem;
+      opacity: 0.9;
+      max-width: 320px;
+      animation: fadeIn 1.7s ease;
+    }
+
+    .fallback {
+      margin-top: 18px;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .fallback a {
+      color: #fff;
+      font-weight: 700;
+      text-decoration: underline;
+    }
+  </style>
+
+  <script>
+    (function logoutNow() {
+      // ✅ Clear SpotAlert keys (explicit)
+      const keysToRemove = [
+        "token",
+        "admin_token",
+        "selectedPlan",
+        "user_email",
+        "spotalert_user",
+        "scan_usage",
+        "camera_count",
+        "pending_plan",      // ✅ you use this on dashboard upgrades
+        "pendingPlan",       // (some older builds used this casing)
+        "plan",
+        "current_plan"
+      ];
+
+      keysToRemove.forEach(k => {
+        try { localStorage.removeItem(k); } catch {}
+      });
+
+      // ✅ Optional: if you want HARD logout for everything, uncomment:
+      // try { localStorage.clear(); } catch {}
+
+      // ✅ Kill back button reopening secured pages
+      try {
+        window.history.replaceState(null, "", "index.html");
+      } catch {}
+
+      // Redirect after animation
+      setTimeout(() => {
+        window.location.replace("index.html");
+      }, 2400);
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="logo"></div>
+  <div class="spinner"></div>
+
+  <h1>Logging you out…</h1>
+  <p>Clearing your session and returning you to SpotAlert.</p>
+
+  <div class="fallback">
+    If you are not redirected, <a href="index.html">click here</a>.
+  </div>
+
+  <noscript>
+    <div class="fallback">
+      JavaScript is required to logout automatically. <a href="index.html">Return Home</a>.
+    </div>
+  </noscript>
+</body>
+</html>
