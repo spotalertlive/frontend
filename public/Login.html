@@ -1,0 +1,180 @@
+sudo tee /var/www/html/login.html > /dev/null <<'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpotAlert – Login</title>
+
+<link rel="icon" href="spotalert_logo.png">
+
+<style>
+body{
+  margin:0;
+  background:#f1f3f6;
+  font-family:Arial,sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.header{
+  position:absolute;
+  top:18px;
+  left:18px;
+}
+.header a{
+  text-decoration:none;
+  color:#007bff;
+  font-weight:600;
+}
+.card{
+  background:#fff;
+  padding:28px;
+  border-radius:14px;
+  width:92%;
+  max-width:380px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+  text-align:center;
+}
+.card img{
+  width:70px;
+  margin-bottom:10px;
+}
+h2{color:#007bff;margin:10px 0;}
+input{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+}
+.password-wrap{position:relative;}
+.password-wrap span{
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  cursor:pointer;
+}
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  background:#007bff;
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+}
+.links{
+  margin-top:14px;
+}
+.links a{
+  color:#007bff;
+  text-decoration:none;
+}
+#error{
+  color:red;
+  margin-bottom:8px;
+}
+
+/* SHIRA */
+#shira{
+  position:fixed;
+  bottom:18px;
+  right:18px;
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  background:#00c2ff;
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:24px;
+  cursor:pointer;
+  box-shadow:0 8px 20px rgba(0,0,0,.25);
+  z-index:9999;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <a href="index.html">← Home</a>
+</div>
+
+<div class="card">
+  <img src="spotalert_logo.png">
+  <h2>SpotAlert Login</h2>
+  <div id="error"></div>
+
+  <input id="email" type="email" placeholder="Email">
+
+  <div class="password-wrap">
+    <input id="password" type="password" placeholder="Password">
+    <span onclick="togglePwd()">👁</span>
+  </div>
+
+  <button onclick="login()">Login</button>
+
+  <div class="links">
+    <a href="reset.html">Forgot password?</a><br>
+    <a href="signup.html">Sign Up</a>
+  </div>
+</div>
+
+<div id="shira" onclick="alert('Hi, I am Shira 👋')">💬</div>
+
+<script>
+function togglePwd(){
+  const p=document.getElementById('password');
+  p.type=p.type==='password'?'text':'password';
+}
+
+async function login(){
+  const email=document.getElementById('email').value.trim();
+  const password=document.getElementById('password').value.trim();
+  const error=document.getElementById('error');
+  error.textContent='';
+
+  if(!email||!password){
+    error.textContent='Enter email and password';
+    return;
+  }
+
+  try{
+    const res=await fetch('/api/auth/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email,password})
+    });
+
+    const data=await res.json();
+
+    if(!res.ok){
+      error.textContent=data.error||'Login failed';
+      return;
+    }
+
+    if(!data.token){
+      error.textContent='Email not verified';
+      return;
+    }
+
+    localStorage.setItem('spotalert-token',data.token);
+    localStorage.setItem('spotalert-user',JSON.stringify(data.user||{}));
+
+    window.location.replace('dashboard.html');
+  }catch(e){
+    error.textContent='Network error';
+  }
+}
+</script>
+
+</body>
+</html>
+EOF
