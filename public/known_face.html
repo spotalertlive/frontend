@@ -1,0 +1,31 @@
+cat << 'EOF' > /var/www/html/known_faces.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Known Faces | SpotAlert</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <h2>Known Faces</h2>
+
+  <div id="auth-error" style="color:red; display:none;">
+    You are not logged in. Please login again.
+  </div>
+
+  <form id="addFaceForm">
+    <input type="text" id="label" placeholder="Full name" required />
+    <input type="file" id="image" accept="image/*" required />
+    <button type="submit">Add Face</button>
+  </form>
+
+  <hr />
+
+  <h3>Saved Faces</h3>
+  <ul id="facesList"></ul>
+
+  <script src="known_faces.js"></script>
+</body>
+</html>
+EOF
